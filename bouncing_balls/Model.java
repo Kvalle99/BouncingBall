@@ -61,6 +61,7 @@ class Model {
 			calcVY(b,deltaT);
 			b.x += deltaT * b.vx;
 			b.y += deltaT * b.vy;
+
 		}
 	}
 	void calcVY (Ball ball, double deltaT) {
@@ -69,15 +70,15 @@ class Model {
 
 	//for both balls
 	void calcVXCollision (Ball ball, Ball collideWith) {
-		//Uses formula for momentum to calculate new velocity in X-axis for both balls'
+		//Uses formula for momentum to calculate new velocity in X-axis for both balls
 		double oldVX = ball.vx;
-		ball.vx = (((ball.mass-collideWith.mass)/(ball.mass+collideWith.mass))*ball.vx) + ((2*collideWith.mass/(ball.mass+collideWith.mass))*collideWith.vx);
-		collideWith.vx =(((collideWith.mass-ball.mass)/(ball.mass-collideWith.mass))*collideWith.vx) + ((2*ball.mass/(ball.mass+collideWith.mass))*oldVX);
+		ball.vx = (((ball.mass-collideWith.mass)/(ball.mass+collideWith.mass))*oldVX) + ((2*collideWith.mass/(ball.mass+collideWith.mass))*collideWith.vx);
+		collideWith.vx =(((collideWith.mass-ball.mass)/(ball.mass+collideWith.mass))*collideWith.vx) + ((2*ball.mass/(ball.mass+collideWith.mass))*oldVX);
 	}
 	void calcVYCollision (Ball ball, Ball collideWith) {
 		//Uses formula for momentum to calculate new velocity in Y-axis for both balls
 		double oldVY =ball.vy;
-		ball.vy = (((ball.mass-collideWith.mass)/(ball.mass+collideWith.mass))*ball.vy) + ((2*collideWith.mass/(ball.mass+collideWith.mass))*collideWith.vy);
+		ball.vy = (((ball.mass-collideWith.mass)/(ball.mass+collideWith.mass))*oldVY) + ((2*collideWith.mass/(ball.mass+collideWith.mass))*collideWith.vy);
 		collideWith.vy =(((collideWith.mass-ball.mass)/(ball.mass+collideWith.mass))*collideWith.vy) + ((2*ball.mass/(ball.mass+collideWith.mass))*oldVY);
 	}
 
