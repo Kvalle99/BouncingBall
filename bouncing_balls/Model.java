@@ -42,6 +42,7 @@ class Model {
 			}
 
 			//TODO add logic for collision with another ball
+			checkCollison(b);
 
 			// compute new position according to the speed of the ball
 			calcVY(b,deltaT);
@@ -53,13 +54,35 @@ class Model {
 		ball.vy = ball.vy - (deltaT*gravity);
 	}
 
-	void checkCollison(Ball b, Ball[] allBalls) {
-		for (Ball ball : allBalls) {
-			//TODO user polar form to calc if balls hit eachoter
+	boolean checkCollison(Ball b) {
+		calcBallsPolarCords(b);
+		for (Ball ball : balls) {
+			calcBallsPolarCords(ball);
+
+
+			double distance = calcDistancePolarCords(b, ball);
+			double totalRadius = b.radius+ball.radius;
+			//System.out.println(distance + ":" + totalRadius);
+
+			//if not the same ball and distance between centers are less than their combined radius
+			if( b != ball && Math.abs(calcDistancePolarCords(b, ball)) <= b.radius+ball.radius){
+				System.out.println("Collision");
+				//TODO use physics to calc new speed (momentum calculations)
+				return true;
+			}
 		}
+		return false;
 	}
 
-	//TODO implement cartesian to polar form converter
+
+	void calcBallsPolarCords (Ball b) {
+		b.polarRadius = Math.sqrt((b.x*b.x) + (b.y*b.y));
+		b.polarAngle = Math.atan(b.y/b.x); //gives answer in radians
+	}
+
+	double calcDistancePolarCords (Ball a, Ball b){
+		return Math.sqrt((a.polarRadius*a.polarRadius) + (b.polarRadius*b.polarRadius) - (2*a.polarRadius*b.polarRadius*Math.cos(a.polarAngle-b.polarAngle)));
+	}
 
 	/**
 	 * Simple inner class describing balls.
@@ -77,6 +100,6 @@ class Model {
 		/**
 		 * Position, speed, and radius of the ball. You may wish to add other attributes.
 		 */
-		double x, y, vx, vy, radius;
+		double x, y, vx, vy, radius, polarRadius, polarAngle;
 	}
 }
