@@ -20,6 +20,8 @@ class Model {
 	
 	Ball [] balls;
 
+	boolean checkedCollission = false;
+
 	Model(double width, double height) {
 		areaWidth = width;
 		areaHeight = height;
@@ -34,16 +36,29 @@ class Model {
 		// TODO this method implements one step of simulation with a step deltaT
 		for (Ball b : balls) {
 			// detect collision with the border
-			if (b.x < b.radius || b.x > areaWidth - b.radius) {
+			if (b.x < b.radius) {
 				b.vx *= -1; // change direction of ball
+				b.x = b.radius; //so that it doesnt go off screen
 			}
-			if (b.y < b.radius || b.y > areaHeight - b.radius) {
+			if (b.x > areaWidth - b.radius) {
+				b.vx *= -1; // change direction of ball
+				b.x = areaWidth - b.radius;
+			}
+			if (b.y < b.radius) {
 				b.vy *= -1;
+				b.y = b.radius;
+			}
+			if(b.y > areaHeight - b.radius){
+				b.vy *= -1;
+				b.y = areaHeight-b.radius;
 			}
 
 			//TODO add logic for collision with another ball
-			checkCollison(b);
-
+				// so that a collision isnt accounted for twice)
+				if (!checkedCollission)
+					checkCollison(b);
+				else
+					checkedCollission = false;
 			// compute new position according to the speed of the ball
 			calcVY(b,deltaT);
 			b.x += deltaT * b.vx;
@@ -54,24 +69,36 @@ class Model {
 		ball.vy = ball.vy - (deltaT*gravity);
 	}
 
-	boolean checkCollison(Ball b) {
-		calcBallsPolarCords(b);
-		for (Ball ball : balls) {
-			calcBallsPolarCords(ball);
+	//for both balls
+	void calcVXCollision (Ball ball, Ball collideWith) {
+		//Uses formula for momentum to calculate new velocity in X-axis for both balls'
+		double oldVX = ball.vx;
+		ball.vx = (((ball.mass-collideWith.mass)/(ball.mass+collideWith.mass))*ball.vx) + ((2*collideWith.mass/(ball.mass+collideWith.mass))*collideWith.vx);
+		collideWith.vx =(((collideWith.mass-ball.mass)/(ball.mass-collideWith.mass))*collideWith.vx) + ((2*ball.mass/(ball.mass+collideWith.mass))*oldVX);
+	}
+	void calcVYCollision (Ball ball, Ball collideWith) {
+		//Uses formula for momentum to calculate new velocity in Y-axis for both balls
+		double oldVY =ball.vy;
+		ball.vy = (((ball.mass-collideWith.mass)/(ball.mass+collideWith.mass))*ball.vy) + ((2*collideWith.mass/(ball.mass+collideWith.mass))*collideWith.vy);
+		collideWith.vy =(((collideWith.mass-ball.mass)/(ball.mass+collideWith.mass))*collideWith.vy) + ((2*ball.mass/(ball.mass+collideWith.mass))*oldVY);
+	}
 
+	void checkCollison(Ball a) {
+		checkedCollission = true;
+		calcBallsPolarCords(a);
+		for(Ball b : balls) {
+			calcBallsPolarCords(b);
 
-			double distance = calcDistancePolarCords(b, ball);
-			double totalRadius = b.radius+ball.radius;
+			double distance = calcDistancePolarCords(a, b);
+			double totalRadius = a.radius + b.radius;
 			//System.out.println(distance + ":" + totalRadius);
 
-			//if not the same ball and distance between centers are less than their combined radius
-			if( b != ball && Math.abs(calcDistancePolarCords(b, ball)) <= b.radius+ball.radius){
+			if (a != b && Math.abs(calcDistancePolarCords(a, b)) <= a.radius + b.radius) {
 				System.out.println("Collision");
-				//TODO use physics to calc new speed (momentum calculations)
-				return true;
+				calcVXCollision(a, b);
+				calcVYCollision(a, b);
 			}
 		}
-		return false;
 	}
 
 
@@ -95,11 +122,12 @@ class Model {
 			this.vx = vx;
 			this.vy = vy;
 			this.radius = r;
+			this.mass = r*r;
 		}
 
 		/**
 		 * Position, speed, and radius of the ball. You may wish to add other attributes.
 		 */
-		double x, y, vx, vy, radius, polarRadius, polarAngle;
+		double x, y, vx, vy, radius, polarRadius, polarAngle, mass;
 	}
 }
