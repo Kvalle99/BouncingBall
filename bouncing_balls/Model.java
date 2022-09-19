@@ -52,8 +52,6 @@ class Model {
 				b.vy *= -1;
 				b.y = areaHeight-b.radius;
 			}
-
-			//TODO add logic for collision with another ball
 				// so that a collision isnt accounted for twice)
 				if (!checkedCollission)
 					checkCollison(b);
