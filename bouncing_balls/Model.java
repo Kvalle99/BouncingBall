@@ -1,5 +1,7 @@
 package bouncing_balls;
 
+import java.lang.Math.*;
+
 /**
  * The physics model.
  * 
@@ -13,6 +15,8 @@ package bouncing_balls;
 class Model {
 
 	double areaWidth, areaHeight;
+
+	double gravity = 9.81;
 	
 	Ball [] balls;
 
@@ -36,13 +40,27 @@ class Model {
 			if (b.y < b.radius || b.y > areaHeight - b.radius) {
 				b.vy *= -1;
 			}
-			
+
+			//TODO add logic for collision with another ball
+
 			// compute new position according to the speed of the ball
+			calcVY(b,deltaT);
 			b.x += deltaT * b.vx;
 			b.y += deltaT * b.vy;
 		}
 	}
-	
+	void calcVY (Ball ball, double deltaT) {
+		ball.vy = ball.vy - (deltaT*gravity);
+	}
+
+	void checkCollison(Ball b, Ball[] allBalls) {
+		for (Ball ball : allBalls) {
+			//TODO user polar form to calc if balls hit eachoter
+		}
+	}
+
+	//TODO implement cartesian to polar form converter
+
 	/**
 	 * Simple inner class describing balls.
 	 */
