@@ -47,6 +47,7 @@ class Model {
 			if (b.y < b.radius) {
 				b.vy *= -1;
 				b.y = b.radius;
+				System.out.println("VY: " + b.vy);
 			}
 			if(b.y > areaHeight - b.radius){
 				b.vy *= -1;
@@ -61,6 +62,7 @@ class Model {
 			calcVY(b,deltaT);
 			b.x += deltaT * b.vx;
 			b.y += deltaT * b.vy;
+			b.bounceTime++;
 
 		}
 	}
@@ -72,12 +74,16 @@ class Model {
 	void calcVXCollision (Ball ball, Ball collideWith) {
 		//Uses formula for momentum to calculate new velocity in X-axis for both balls
 		double oldVX = ball.vx;
+		double kinetic = (ball.mass*ball.vx*ball.vx)/2 + (collideWith.mass*collideWith.vx*collideWith.vx)/2;
+		//System.out.println("Kinetic energy X: " + kinetic);
 		ball.vx = (((ball.mass-collideWith.mass)/(ball.mass+collideWith.mass))*oldVX) + ((2*collideWith.mass/(ball.mass+collideWith.mass))*collideWith.vx);
 		collideWith.vx =(((collideWith.mass-ball.mass)/(ball.mass+collideWith.mass))*collideWith.vx) + ((2*ball.mass/(ball.mass+collideWith.mass))*oldVX);
 	}
 	void calcVYCollision (Ball ball, Ball collideWith) {
 		//Uses formula for momentum to calculate new velocity in Y-axis for both balls
 		double oldVY =ball.vy;
+		double kinetic = (ball.mass*ball.vy*ball.vy)/2 + (collideWith.mass*collideWith.vy*collideWith.vy)/2;
+		//System.out.println("Kinetic energy Y: " + kinetic);
 		ball.vy = (((ball.mass-collideWith.mass)/(ball.mass+collideWith.mass))*oldVY) + ((2*collideWith.mass/(ball.mass+collideWith.mass))*collideWith.vy);
 		collideWith.vy =(((collideWith.mass-ball.mass)/(ball.mass+collideWith.mass))*collideWith.vy) + ((2*ball.mass/(ball.mass+collideWith.mass))*oldVY);
 	}
@@ -122,11 +128,12 @@ class Model {
 			this.vy = vy;
 			this.radius = r;
 			this.mass = r*r;
+			bounceTime = 20;
 		}
 
 		/**
 		 * Position, speed, and radius of the ball. You may wish to add other attributes.
 		 */
-		double x, y, vx, vy, radius, polarRadius, polarAngle, mass;
+		double x, y, vx, vy, radius, polarRadius, polarAngle, mass, bounceTime;
 	}
 }
