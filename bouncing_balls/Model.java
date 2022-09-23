@@ -21,6 +21,7 @@ class Model {
 	Ball [] balls;
 
 	boolean checkedCollission = false;
+	boolean calcVYwhen = true;
 
 	Model(double width, double height) {
 		areaWidth = width;
@@ -33,9 +34,8 @@ class Model {
 	}
 
 	void step(double deltaT) {
-		// TODO this method implements one step of simulation with a step deltaT
 		for (Ball b : balls) {
-			// detect collision with the border
+			// detect collision with the border, position is adjusted so it doesnt overlap with border.
 			if (b.x < b.radius) {
 				b.vx *= -1; // change direction of ball
 				b.x = b.radius; //so that it doesnt go off screen
@@ -47,22 +47,23 @@ class Model {
 			if (b.y < b.radius) {
 				b.vy *= -1;
 				b.y = b.radius;
-				System.out.println("VY: " + b.vy);
+				//System.out.println("VY: " + b.vy);
 			}
 			if(b.y > areaHeight - b.radius){
 				b.vy *= -1;
 				b.y = areaHeight-b.radius;
 			}
-				// so that a collision isnt accounted for twice)
+				// so that a collision isnt accounted for twice during the same deltaT, this solution only works for 2 balls, if more are added it will cause a bug
+				//But in the problem formulation it is clearly stated that we are modelling two bouncing balls so it should be fine.
 				if (!checkedCollission)
 					checkCollison(b);
-				else
+				else {
 					checkedCollission = false;
+				}
 			// compute new position according to the speed of the ball
 			calcVY(b,deltaT);
 			b.x += deltaT * b.vx;
 			b.y += deltaT * b.vy;
-			b.bounceTime++;
 
 		}
 	}
@@ -70,12 +71,12 @@ class Model {
 		ball.vy = ball.vy - (deltaT*gravity);
 	}
 
-	//for both balls
+	//calc new speeds for both balls at collision, according to standard physics formulas. (formula for momentum and kinetic energy)
 	void calcVXCollision (Ball ball, Ball collideWith) {
 		//Uses formula for momentum to calculate new velocity in X-axis for both balls
 		double oldVX = ball.vx;
 		double kinetic = (ball.mass*ball.vx*ball.vx)/2 + (collideWith.mass*collideWith.vx*collideWith.vx)/2;
-		//System.out.println("Kinetic energy X: " + kinetic);
+		System.out.println("Kinetic energy X: " + kinetic);
 		ball.vx = (((ball.mass-collideWith.mass)/(ball.mass+collideWith.mass))*oldVX) + ((2*collideWith.mass/(ball.mass+collideWith.mass))*collideWith.vx);
 		collideWith.vx =(((collideWith.mass-ball.mass)/(ball.mass+collideWith.mass))*collideWith.vx) + ((2*ball.mass/(ball.mass+collideWith.mass))*oldVX);
 	}
@@ -83,7 +84,7 @@ class Model {
 		//Uses formula for momentum to calculate new velocity in Y-axis for both balls
 		double oldVY =ball.vy;
 		double kinetic = (ball.mass*ball.vy*ball.vy)/2 + (collideWith.mass*collideWith.vy*collideWith.vy)/2;
-		//System.out.println("Kinetic energy Y: " + kinetic);
+		System.out.println("Kinetic energy Y: " + kinetic);
 		ball.vy = (((ball.mass-collideWith.mass)/(ball.mass+collideWith.mass))*oldVY) + ((2*collideWith.mass/(ball.mass+collideWith.mass))*collideWith.vy);
 		collideWith.vy =(((collideWith.mass-ball.mass)/(ball.mass+collideWith.mass))*collideWith.vy) + ((2*ball.mass/(ball.mass+collideWith.mass))*oldVY);
 	}
@@ -98,6 +99,7 @@ class Model {
 			double totalRadius = a.radius + b.radius;
 			//System.out.println(distance + ":" + totalRadius);
 
+			//checks if combined radius of both balls are shorter than the distance from their centers using polar coordinates
 			if (a != b && Math.abs(calcDistancePolarCords(a, b)) <= a.radius + b.radius) {
 				System.out.println("Collision");
 				calcVXCollision(a, b);
@@ -112,6 +114,7 @@ class Model {
 		b.polarAngle = Math.atan(b.y/b.x); //gives answer in radians
 	}
 
+	//trigonometirc calculation for distance between balls centers
 	double calcDistancePolarCords (Ball a, Ball b){
 		return Math.sqrt((a.polarRadius*a.polarRadius) + (b.polarRadius*b.polarRadius) - (2*a.polarRadius*b.polarRadius*Math.cos(a.polarAngle-b.polarAngle)));
 	}
@@ -127,13 +130,13 @@ class Model {
 			this.vx = vx;
 			this.vy = vy;
 			this.radius = r;
-			this.mass = r*r;
-			bounceTime = 20;
+			this.mass = r*r*Math.PI; //actually the radius, but the mass is arbitrary and just needed for calculations of
+									// speed due to momentum and energy calculations
 		}
 
 		/**
 		 * Position, speed, and radius of the ball. You may wish to add other attributes.
 		 */
-		double x, y, vx, vy, radius, polarRadius, polarAngle, mass, bounceTime;
+		double x, y, vx, vy, radius, polarRadius, polarAngle, mass;
 	}
 }
